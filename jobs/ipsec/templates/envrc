@@ -1,0 +1,2 @@
+# source me!
+export PATH=$PATH:/var/vcap/packages/strongswan/sbin

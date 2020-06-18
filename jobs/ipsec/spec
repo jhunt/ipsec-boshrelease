@@ -1,0 +1,72 @@
+---
+name: ipsec
+packages:
+  - strongswan
+  - ttar
+
+templates:
+  envrc:               envrc
+  bin/pre-start:       bin/pre-start
+
+  etc/strongswan.conf: etc/strongswan.conf
+  etc/ipsec.conf:      etc/ipsec.conf
+  etc/ipsec.secrets:   etc/ipsec.secrets
+
+  etc/cacerts.ttar:    etc/cacerts.ttar
+  etc/keypairs.ttar:   etc/keypairs.ttar
+
+properties:
+  debug:
+    default: false
+    description: |
+      Enable additional, more verbose debugging and logging options on
+      various components, to aid in debugging and diagnostic efforts.
+
+  timeout:
+    default: 30
+    description: |
+      How long (in seconds) to wait for the IPsec subsytem (notable, the
+      charon daemon) to start up, during BOSH pre-start.
+
+  ca:
+    default: []
+    description: |
+      A list of PEM-encoded X.509 Certificate Authority certificates that
+      will be used as the basis for PKI in IPsec.
+
+  keypairs:
+    description: |
+      A map of certificate / keypairs, indexed by _internal_ name, which
+      will be used to reference them from the `encrypted` property.
+
+      The keypair named "default" will be used on all encrypted
+      configurations that do not explictly specify a keypair.
+
+      Each entry in the list must have two YAML keys: `certificate` and
+      `key`, supplying the PEM-encoded X.509 certificate and PEM-encoded
+      private key, respectively.
+
+  encrypted:
+    default: []
+    description: |
+      A list of subnets or hosts that are participating in encrypted IPsec
+      communications.  Packets to and from these hosts / subnets will be
+      encrypted, and validated.
+
+      Each entry in the list is an object (map) with the following keys:
+
+        - `net` or `host` - A subnet (ip/cdir) or host IP to restrict the
+          scope of encryption traffic too.  This must be lexically unique.
+          If you specify a `host` with a `/cidr` mask, the release will
+          raise an error and refuse to deploy.
+
+        - `keypair` - The name of the certificate / private key pair, from
+          the `keypairs` job property.  If not specified, "default" is
+          assumed.
+
+  cleartext:
+    default: []
+    description: |
+      A list of subnets or hosts that are *NOT* participating in encrypted
+      IPsec communications.  Packets to and from these hosts / subnets will
+      *NOT* be encrypted or validated.

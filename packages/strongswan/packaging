@@ -10,7 +10,7 @@ export CFLAGS="-I/var/vcap/packages/gmp/include"
 export LDFLAGS="-L/var/vcap/packages/gmp/lib"
 
 ./configure --prefix ${BOSH_INSTALL_TARGET} \
-  --sysconfdir=/var/vcap/jobs/strongswan/config \
+  --sysconfdir=/var/vcap/jobs/ipsec/etc \
   --with-capabilities=native \
   --with-fips-mode=1
 make -j$CPUS

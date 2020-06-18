@@ -1,0 +1,4 @@
+<% [p('ca', [])].flatten.each_with_index do |ca, i| %>
+========================== 0644 /var/vcap/jobs/ipsec/etc/ipsec.d/cacerts/ca<%= i %>.pem
+<%= ca %>
+<% end %>

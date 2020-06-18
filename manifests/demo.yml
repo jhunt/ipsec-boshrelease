@@ -1,0 +1,91 @@
+name: ipsec-demo
+
+variables:
+  - name: network
+  - name: first_ip
+  - name: second_ip
+  - name: keypair
+    type: rsa
+  - name: ca
+    type: certificate
+    options:
+      is_ca: true
+      common_name: 'IPSec Demo CA'
+  - name: first_cert
+    type: certificate
+    options:
+      ca: ca
+      common_name: node1
+      alternative_names:
+        - ((first_ip))
+  - name: second_cert
+    type: certificate
+    options:
+      ca: ca
+      common_name: node2
+      alternative_names:
+        - ((second_ip))
+
+instance_groups:
+  - name: node1
+    instances: 1
+    vm_type: default
+    stemcell: xenial
+    azs: [z1]
+    networks:
+      - name: ((network))
+        static_ips: [((first_ip))]
+    jobs:
+      - release: strongswan
+        name:    ipsec
+        properties:
+          debug: yes
+          ca:
+            - ((ca.certificate))
+          keypairs:
+            default:
+              certificate: ((first_cert.certificate))
+              key: ((first_cert.private_key))
+          encrypted:
+            - host: ((second_ip))
+
+  - name: node2
+    instances: 1
+    vm_type: default
+    stemcell: xenial
+    azs: [z1]
+    networks:
+      - name: ((network))
+        static_ips: [((second_ip))]
+    jobs:
+      - release: strongswan
+        name:    ipsec
+        properties:
+          debug: yes
+          ca:
+            - ((ca.certificate))
+          keypairs:
+            default:
+              certificate: ((second_cert.certificate))
+              key: ((second_cert.private_key))
+          encrypted:
+            - host: ((first_ip))
+
+
+update:
+  canaries: 1
+  canary_watch_time: 1000-60000
+  max_in_flight: 1
+  serial: true
+  update_watch_time: 1000-60000
+
+stemcells:
+  - alias: xenial
+    os: ubuntu-xenial
+    version: latest
+
+releases:
+  - name:    strongswan
+    version: latest
+    #url:     https://github.com/cloudfoundry-community/vault-boshrelease/releases/download/v1.1.4/vault-1.1.4.tgz
+    #sha1:    3ee89928891274183ea27c4499744635112f6152

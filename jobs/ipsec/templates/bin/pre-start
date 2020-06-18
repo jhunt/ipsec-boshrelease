@@ -1,0 +1,63 @@
+#!/bin/bash
+set -eu
+exec 2>&1
+
+JOB=ipsec
+BIN=pre-start
+JOB_DIR=/var/vcap/jobs/$JOB
+
+PATH=$PATH:/var/vcap/packages/strongswan/sbin
+PATH=$PATH:/var/vcap/packages/ttar/bin
+PIDFILE=/var/run/charon.pid
+TIMEOUT=<%= p('timeout', 30) %>
+export PATH
+
+echo "[$(date)] $BIN/$$: starting up..."
+echo "[$(date)] $BIN/$$: inflating cacerts..."
+mkdir -p ${JOB_DIR}/etc/ipsec.d/cacerts
+ttar < ${JOB_DIR}/etc/cacerts.ttar
+echo "[$(date)] $BIN/$$: inflating keypairs..."
+mkdir -p ${JOB_DIR}/keypairs
+ttar < ${JOB_DIR}/etc/keypairs.ttar
+
+echo "[$(date)] $BIN/$$: looking for existing charon process..."
+if [[ -e $PIDFILE ]]; then
+	echo "[$(date)] $BIN/$$: pid file $PIDFILE found; stopping ipsec..."
+	ipsec stop
+
+	n=$(( TIMEOUT * 10 ))
+	while [[ $n -gt 0 ]]; do
+		if [[ ! -e $PIDFILE ]]; then
+			break
+		fi
+		sleep 0.1
+		n=$(( n - 1 ))
+	done
+
+	if [[ -e $PIDFILE ]]; then
+		echo "[$(date)] $BIN/$$: FAILED! ipsec subsystem did not stop within ${TIMEOUT}s"
+		exit 1
+	fi
+
+	echo "[$(date)] $BIN/$$: ipsec subsystem stopped."
+fi
+
+echo "[$(date)] $BIN/$$: starting ipsec subsystem..."
+ALIVE=""
+ipsec start
+
+echo "[$(date)] $BIN/$$: waiting for ipsec subsystem to become available..."
+n=$(( TIMEOUT * 10 ))
+while [[ $n -gt 0 ]]; do
+	if ipsec statusall | grep -Eq 'uptime: [1-9]'; then
+		echo "[$(date)] $BIN/$$: \`ipsec statusall\` said:";
+		ipsec statusall | sed -e "s/^/[$(date)] $BIN\/$$: /"
+		echo "[$(date)] $BIN/$$: ipsec subsystem started up.";
+		exit 0
+	fi
+	sleep 0.1
+	n=$(( n - 1 ))
+done
+
+echo "[$(date)] $BIN/$$: FAILED! ipsec subsystem did not start within ${TIMEOUT}s"
+exit 1

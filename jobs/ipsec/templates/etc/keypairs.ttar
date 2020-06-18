@@ -1,0 +1,6 @@
+<% p("keypairs", {}).each do |id, keypair| %>
+========================== 0644 /var/vcap/jobs/ipsec/keypairs/<%= id %>/cert.pem
+<%= keypair["certificate"] %>
+========================== 0644 /var/vcap/jobs/ipsec/keypairs/<%= id %>/key.pem
+<%= keypair["key"] %>
+<% end %>

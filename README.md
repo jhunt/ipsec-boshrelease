@@ -1,76 +1,73 @@
-# BOSH Release for strongswan
+# IPsec for BOSH
 
-## Usage
+This BOSH release leverages [strongSwan][1] to provide IPsec/IKE
+for securing network traffic on your BOSH VMs, at a layer _below_
+the application.  This helps catch all those pesky cleartext
+servers, systems that don't support TLS natively, etc.
 
-To use this bosh release, first upload it to your bosh:
+## Getting Started
 
-```
-bosh target BOSH_HOST
-git clone https://github.com/cloudfoundry-community/strongswan-boshrelease.git
-cd strongswan-boshrelease
-bosh upload release releases/strongswan/strongswan-1.yml
-```
+Unfortunately, IPsec isn't something you _just run_ - it requires
+a non-trivial amount of information about the network topology,
+who is and is not participating in IPsec, what X.509 authorities
+are in force, and who has what certificate.
 
-For [bosh-lite](https://github.com/cloudfoundry/bosh-lite), you can quickly create a deployment manifest & deploy a cluster. Note that this requires that you have installed [spruce](https://github.com/geofffranks/spruce).
+This repository ships with a simple manifest that spins up two VMs
+with IPsec configured between them, if you can provide it with
+networking information.  This can be used to validate this BOSH
+release **before** you incorporate it into your infrastructure for
+real.
 
-```
-templates/make_manifest warden
-bosh -n deploy
-```
+    bosh deploy manifests/demo.yml \
+           -v network=default \
+           -v first_ip=10.0.0.16 \
+           -v second_ip=10.0.0.17
 
-For AWS EC2, create a single VM:
+The two variables, `first_ip` and `second_ip` will be assigned to
+the two nodes, so they will need to exist in your cloud config as
+static ranges on the network you chose (via `network=...`).
 
-```
-templates/make_manifest aws-ec2
-bosh -n deploy
-```
+Traffic between those two IP addresses will be encrypted.
 
-### Override security groups
+To validate, you can initiate a connection (via something like
+`nc`) between the hosts while running an appropriate `tcpdump` on
+the link.  Here's an idea to get you started:
 
-For AWS & Openstack, the default deployment assumes there is a `default` security group. If you wish to use a different security group(s) then you can pass in additional configuration when running `make_manifest` above.
+    vcap@node1 $ nc -l 4004
 
-Create a file `my-networking.yml`:
+    vcap@node2 $ /bin/sh -c 'while true; do date; sleep 1; done' | \
+                   nc 0.0.0.17 4004
 
-``` yaml
----
-networks:
-  - name: strongswan1
-    type: dynamic
-    cloud_properties:
-      security_groups:
-        - strongswan
-```
+Then, you can attempt to sniff traffic on port 4004, from either
+node:
 
-Where `- strongswan` means you wish to use an existing security group called `strongswan`.
+    vcap@node1 # tcpdump -Xnvv host ((first_ip))
 
-You now suffix this file path to the `make_manifest` command:
+If IPsec is functioning as expected, your `tcpdump` output should
+_not_ contain readable date stamps (packet payloads).  Instead,
+you should see IP packets with ESP markers and `spi` values in
+them:
 
-```
-templates/make_manifest openstack-nova my-networking.yml
-bosh -n deploy
-```
-
-### Development
-
-As a developer of this release, create new releases and upload them:
-
-```
-bosh create release --force && bosh -n upload release
-```
-
-### Final releases
-
-To share final releases:
-
-```
-bosh create release --final
-```
-
-By default the version number will be bumped to the next major number. You can specify alternate versions:
+    20:42:41.010979 IP (tos 0x0, ttl 64, id 21002, offset 0, flags [DF], proto ESP (50), length 88)
+    10.128.16.132 > 10.128.16.133: ESP(spi=0xc5f84573,seq=0x84d), length 68
+        0x0000:  4500 0058 520a 4000 4032 b261 0a80 1084  E..XR.@.@2.a....
+        0x0010:  0a80 1085 c5f8 4573 0000 084d 5575 4029  ......Es...MUu@)
+        0x0020:  4479 f025 2b18 b6ec 3f2b b7e5 e523 8c21  Dy.%+...?+...#.!
+        0x0030:  32cd a59d a9df 2100 4eaf 4b02 fcfa a3ed  2.....!.N.K.....
+        0x0040:  0a35 8676 6add 1087 1647 4663 e9b7 1cb1  .5.vj....GFc....
+        0x0050:  5e0f 2fe2 7c84 2f4f                      ^./.|./O
 
 
-```
-bosh create release --final --version 2.1
-```
+# Contributing
 
-After the first release you need to contact [Dmitriy Kalinin](mailto://dkalinin@pivotal.io) to request your project is added to https://bosh.io/releases (as mentioned in README above).
+This BOSH release was forked from the `strongswan-boshrelease`,
+which was mostly unused (and a bit out-of-date), but was aimed at
+solving a _different_ problem with strongSwan -- that of VPN
+tunnel configuration.
+
+Contributions to this BOSH release are welcome!  If you find a
+bug, or something doesn't work quite right, please open an issue
+in the GitHub issue tracker.
+
+
+[1]: https://strongswan.org/
