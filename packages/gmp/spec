@@ -2,4 +2,4 @@
 name: gmp
 dependencies: []
 files:
-- gmp/gmp-*.tar.xz
+  - gmp/gmp-*.tar.xz

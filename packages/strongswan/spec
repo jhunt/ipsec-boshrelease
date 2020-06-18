@@ -2,4 +2,4 @@
 name: strongswan
 dependencies: [gmp]
 files:
-- strongswan/strongswan-*.tar.bz2
+  - strongswan/strongswan-*.tar.bz2

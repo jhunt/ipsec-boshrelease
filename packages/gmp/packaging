@@ -1,17 +1,11 @@
-set -e # exit immediately if a simple command exits with a non-zero status
-set -u # report the usage of uninitialized variables
-
-# Detect # of CPUs so make jobs can be parallelized
+#!/bin/sh
+set -eu
 CPUS=$(grep -c ^processor /proc/cpuinfo)
- # Available variables
-# $BOSH_COMPILE_TARGET - where this package & spec'd source files are available
-# $BOSH_INSTALL_TARGET - where you copy/install files to be included in package
-export HOME=/var/vcap
 
-
-tar xvf gmp/gmp-6.1.1.tar.xz
-cd gmp-6.1.1
+v=6.1.1
+tar -xvf gmp/gmp-${v}.tar.xz
+cd gmp-${v}
 
 ./configure --prefix=${BOSH_INSTALL_TARGET}
-make
+make -j$CPUS
 make install

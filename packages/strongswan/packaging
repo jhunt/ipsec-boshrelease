@@ -1,16 +1,10 @@
-set -e # exit immedately if a simple command exits with a non-zero status
-set -u # report the usage of uninitialized variables
-
-# Detect # of CPUs so make jobs can be parallelized
+#!/bin/sh
+set -eu
 CPUS=$(grep -c ^processor /proc/cpuinfo)
- # Available variables
-# $BOSH_COMPILE_TARGET - where this package & spec'd source files are available
-# $BOSH_INSTALL_TARGET - where you copy/install files to be included in package
-export HOME=/var/vcap
 
-
-tar xvjf strongswan/strongswan-5.5.0.tar.bz2
-cd strongswan-5.5.0
+v=5.5.0
+tar -xvjf strongswan/strongswan-${v}.tar.bz2
+cd strongswan-${v}/
 
 export CFLAGS="-I/var/vcap/packages/gmp/include"
 export LDFLAGS="-L/var/vcap/packages/gmp/lib"
@@ -19,5 +13,5 @@ export LDFLAGS="-L/var/vcap/packages/gmp/lib"
   --sysconfdir=/var/vcap/jobs/strongswan/config \
   --with-capabilities=native \
   --with-fips-mode=1
-make
+make -j$CPUS
 make install
