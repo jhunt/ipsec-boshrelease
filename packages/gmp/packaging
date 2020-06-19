@@ -2,7 +2,10 @@
 set -eu
 CPUS=$(grep -c ^processor /proc/cpuinfo)
 
-v=6.1.1
+# see https://gmplib.org/#DOWNLOAD
+# and https://gmplib.org/download/gmp/gmp-6.2.0.tar.xz
+
+v=6.2.0
 tar -xvf gmp/gmp-${v}.tar.xz
 cd gmp-${v}
 

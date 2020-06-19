@@ -2,7 +2,10 @@
 set -eu
 CPUS=$(grep -c ^processor /proc/cpuinfo)
 
-v=5.5.0
+# see https://download.strongswan.org/
+# and https://download.strongswan.org/strongswan-5.8.4.tar.bz2
+
+v=5.8.4
 tar -xvjf strongswan/strongswan-${v}.tar.bz2
 cd strongswan-${v}/
 
