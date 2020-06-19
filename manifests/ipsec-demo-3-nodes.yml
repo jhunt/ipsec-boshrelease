@@ -57,7 +57,7 @@ instance_groups:
       - name: ((network))
         static_ips: [((first_ip))]
     jobs:
-      - release: strongswan
+      - release: ipsec
         name:    ipsec
         properties:
           debug: yes
@@ -86,7 +86,7 @@ instance_groups:
       - name: ((network))
         static_ips: [((second_ip))]
     jobs:
-      - release: strongswan
+      - release: ipsec
         name:    ipsec
         properties:
           debug: yes
@@ -108,7 +108,7 @@ instance_groups:
       - name: ((network))
         static_ips: [((third_ip))]
     jobs:
-      - release: strongswan
+      - release: ipsec
         name:    ipsec
         properties:
           debug: yes
@@ -135,7 +135,7 @@ stemcells:
     version: latest
 
 releases:
-  - name:    strongswan
+  - name:    ipsec
     version: latest
-    #url:     https://github.com/cloudfoundry-community/vault-boshrelease/releases/download/v1.1.4/vault-1.1.4.tgz
-    #sha1:    3ee89928891274183ea27c4499744635112f6152
+    #url:     ...
+    #sha1:    ...
