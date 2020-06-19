@@ -136,6 +136,6 @@ stemcells:
 
 releases:
   - name:    ipsec
-    version: latest
-    #url:     ...
-    #sha1:    ...
+    version: 0.9.0
+    url:     https://github.com/jhunt/ipsec-boshrelease/releases/download/v0.9.0/ipsec-0.9.0.tgz
+    sha1:    11e92be8f1c293f115484264747ae39d18b13daf
