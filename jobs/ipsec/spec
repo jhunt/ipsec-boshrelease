@@ -64,6 +64,27 @@ properties:
           the `keypairs` job property.  If not specified, "default" is
           assumed.
 
+        - `options` - Another object (map) that provides advanced
+          configuration directives for `ipsec.conf`; use these with
+          **GREAT** care, as they have the potential to break your setup in
+          new and interesting ways otherwise.
+
+          By default, `options` is assumed to be the following:
+
+              auto:        route
+              type:        transport
+              keyexchange: ike
+              esp:         aes128gcm16!
+              ike:         aes128-sha256-modp2048!
+              mobike:      no
+              dpdaction:   restart
+              dpdtimeout:  10s
+              dpddelay:    10s
+
+          and overrides in-manifest are done key-wise (allowing you to, for
+          example, override just `dpddelay` without having to supply all the
+          other defaults.
+
   cleartext:
     default: []
     description: |

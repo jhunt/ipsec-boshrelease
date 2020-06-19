@@ -1,0 +1,97 @@
+name: ipsec-demo-aes256gcm16
+
+variables:
+  - name: network
+  - name: first_ip
+  - name: second_ip
+
+  - name: ca
+    type: certificate
+    options:
+      is_ca: true
+      common_name: 'IPSec Demo CA'
+  - name: first_cert
+    type: certificate
+    options:
+      ca: ca
+      common_name: node1
+      alternative_names:
+        - ((first_ip))
+  - name: second_cert
+    type: certificate
+    options:
+      ca: ca
+      common_name: node2
+      alternative_names:
+        - ((second_ip))
+
+instance_groups:
+  - name: node1
+    instances: 1
+    vm_type: default
+    stemcell: xenial
+    azs: [z1]
+    networks:
+      - name: ((network))
+        static_ips: [((first_ip))]
+    jobs:
+      - release: ipsec
+        name:    ipsec
+        properties:
+          debug: yes
+          ca:
+            - ((ca.certificate))
+          keypairs:
+            default:
+              certificate: ((first_cert.certificate))
+              key: ((first_cert.private_key))
+          encrypted:
+            - host: ((second_ip))
+              options:
+                esp: aes256gcm16!
+                ike: aes256-sha256-modp4096!
+
+  - name: node2
+    instances: 1
+    vm_type: default
+    stemcell: xenial
+    azs: [z1]
+    networks:
+      - name: ((network))
+        static_ips: [((second_ip))]
+    jobs:
+      - release: ipsec
+        name:    ipsec
+        properties:
+          debug: yes
+          ca:
+            - ((ca.certificate))
+          keypairs:
+            default:
+              certificate: ((second_cert.certificate))
+              key: ((second_cert.private_key))
+          encrypted:
+            - host: ((first_ip))
+              options:
+                esp: aes256gcm16!
+                ike: aes256-sha256-modp4096!
+
+
+
+update:
+  canaries: 1
+  canary_watch_time: 1000-60000
+  max_in_flight: 1
+  serial: true
+  update_watch_time: 1000-60000
+
+stemcells:
+  - alias: xenial
+    os: ubuntu-xenial
+    version: latest
+
+releases:
+  - name:    ipsec
+    version: latest
+    #url:     ...
+    #sha1:    ...

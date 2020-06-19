@@ -67,6 +67,12 @@ talk to each other in the clear.  The manifest is worth study,
 since it shows off multiple keypairs, as well as more than one
 encrypted peer host/net.
 
+Finally, if you're not happy with the default aes128gcm16 / sha256
+/ modp2048 encrypyion / integrity / dh algorithm, you might want
+to check out `manifests/ipsec-demo-aes256gcm16.yml`, to see how
+you can set the `ike` and `esp` options on a per-endpoint basis,
+and amp up that security!
+
 # Contributing
 
 This BOSH release was forked from the `strongswan-boshrelease`,
