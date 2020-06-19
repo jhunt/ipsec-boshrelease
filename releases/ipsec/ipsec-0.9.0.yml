@@ -1,0 +1,33 @@
+name: ipsec
+version: 0.9.0
+commit_hash: bfd31c9
+uncommitted_changes: false
+jobs:
+- name: ipsec
+  version: 63e9d0d2f297620c87684206ae5cd60ad726b17b028dd05f4900508c0ee3efef
+  fingerprint: 63e9d0d2f297620c87684206ae5cd60ad726b17b028dd05f4900508c0ee3efef
+  sha1: sha256:e62a916eafc7731569a3b3bbc4f3d28695137eb80fc171f77e12764b0d0e8152
+  packages:
+  - strongswan
+  - ttar
+packages:
+- name: gmp
+  version: 6f1e3d0857bdaffb3d91dbd5a57d821f7981f24f5845ae30938a62fd4b4db5fe
+  fingerprint: 6f1e3d0857bdaffb3d91dbd5a57d821f7981f24f5845ae30938a62fd4b4db5fe
+  sha1: sha256:45a5e1f294002f8af1edc6795715180b45b87ab47dbc56429c9e3d63cc8d2b49
+  dependencies: []
+- name: strongswan
+  version: a1d2140387c8e01cf34f1781ebc266097f4d95c6c300922ea6cf6b22efc48883
+  fingerprint: a1d2140387c8e01cf34f1781ebc266097f4d95c6c300922ea6cf6b22efc48883
+  sha1: sha256:350b3a8d208ad942228ea97f98097f9d775b9d66b41e207b37650d855928b57d
+  dependencies:
+  - gmp
+- name: ttar
+  version: 1800fc3dfc5892935245e1d6bb340e9f864596ab50cf1cc46af4b80af693ce9a
+  fingerprint: 1800fc3dfc5892935245e1d6bb340e9f864596ab50cf1cc46af4b80af693ce9a
+  sha1: sha256:c82af1d9865cccf163f342d7bd095e20fb4e7ea7ec2fdb1e17f42c0063670845
+  dependencies: []
+license:
+  version: c027ecdf0016e6f072c390230a50ce11be821c47c72536d9c66a1dd3b882640b
+  fingerprint: c027ecdf0016e6f072c390230a50ce11be821c47c72536d9c66a1dd3b882640b
+  sha1: sha256:dba37575e5322c6e23b626ca0473e3a0c53272b0b34e7b1e5a2d3a8b9e00b159
