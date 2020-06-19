@@ -1,0 +1,141 @@
+name: ipsec-demo-3-nodes
+
+variables:
+  - name: network
+
+  - name: first_ip
+  - name: second_ip
+  - name: third_ip
+
+  - name: ca1
+    type: certificate
+    options:
+      is_ca: true
+      common_name: 'IPSec Demo CA 1'
+  - name: ca2
+    type: certificate
+    options:
+      is_ca: true
+      common_name: 'IPSec Demo CA 2'
+  - name: first_cert_ca1
+    type: certificate
+    options:
+      ca: ca1
+      common_name: node1
+      alternative_names:
+        - ((first_ip))
+  - name: second_cert_ca1
+    type: certificate
+    options:
+      ca: ca1
+      common_name: node2
+      alternative_names:
+        - ((second_ip))
+
+  - name: first_cert_ca2
+    type: certificate
+    options:
+      ca: ca2
+      common_name: node1
+      alternative_names:
+        - ((first_ip))
+  - name: third_cert_ca2
+    type: certificate
+    options:
+      ca: ca2
+      common_name: node2
+      alternative_names:
+        - ((third_ip))
+
+instance_groups:
+  - name: node1
+    instances: 1
+    vm_type: default
+    stemcell: xenial
+    azs: [z1]
+    networks:
+      - name: ((network))
+        static_ips: [((first_ip))]
+    jobs:
+      - release: strongswan
+        name:    ipsec
+        properties:
+          debug: yes
+          ca:
+            - ((ca1.certificate))
+            - ((ca2.certificate))
+          keypairs:
+            zone-a:
+              certificate: ((first_cert_ca1.certificate))
+              key: ((first_cert_ca1.private_key))
+            zone-b:
+              certificate: ((first_cert_ca2.certificate))
+              key: ((first_cert_ca2.private_key))
+          encrypted:
+            - host: ((second_ip))
+              keypair: zone-a
+            - host: ((third_ip))
+              keypair: zone-b
+
+  - name: node2
+    instances: 1
+    vm_type: default
+    stemcell: xenial
+    azs: [z1]
+    networks:
+      - name: ((network))
+        static_ips: [((second_ip))]
+    jobs:
+      - release: strongswan
+        name:    ipsec
+        properties:
+          debug: yes
+          ca:
+            - ((ca1.certificate))
+          keypairs:
+            default:
+              certificate: ((second_cert_ca1.certificate))
+              key: ((second_cert_ca1.private_key))
+          encrypted:
+            - host: ((first_ip))
+
+  - name: node3
+    instances: 1
+    vm_type: default
+    stemcell: xenial
+    azs: [z1]
+    networks:
+      - name: ((network))
+        static_ips: [((third_ip))]
+    jobs:
+      - release: strongswan
+        name:    ipsec
+        properties:
+          debug: yes
+          ca:
+            - ((ca2.certificate))
+          keypairs:
+            default:
+              certificate: ((third_cert_ca2.certificate))
+              key: ((third_cert_ca2.private_key))
+          encrypted:
+            - host: ((first_ip))
+
+
+update:
+  canaries: 1
+  canary_watch_time: 1000-60000
+  max_in_flight: 1
+  serial: true
+  update_watch_time: 1000-60000
+
+stemcells:
+  - alias: xenial
+    os: ubuntu-xenial
+    version: latest
+
+releases:
+  - name:    strongswan
+    version: latest
+    #url:     https://github.com/cloudfoundry-community/vault-boshrelease/releases/download/v1.1.4/vault-1.1.4.tgz
+    #sha1:    3ee89928891274183ea27c4499744635112f6152

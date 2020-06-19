@@ -4,8 +4,7 @@ variables:
   - name: network
   - name: first_ip
   - name: second_ip
-  - name: keypair
-    type: rsa
+
   - name: ca
     type: certificate
     options:

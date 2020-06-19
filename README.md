@@ -18,7 +18,7 @@ networking information.  This can be used to validate this BOSH
 release **before** you incorporate it into your infrastructure for
 real.
 
-    bosh deploy manifests/demo.yml \
+    bosh deploy manifests/ipsec-demo.yml \
            -v network=default \
            -v first_ip=10.0.0.16 \
            -v second_ip=10.0.0.17
@@ -36,7 +36,7 @@ the link.  Here's an idea to get you started:
     vcap@node1 $ nc -l 4004
 
     vcap@node2 $ /bin/sh -c 'while true; do date; sleep 1; done' | \
-                   nc 0.0.0.17 4004
+                   nc 10.0.0.17 4004
 
 Then, you can attempt to sniff traffic on port 4004, from either
 node:
@@ -57,6 +57,15 @@ them:
         0x0040:  0a35 8676 6add 1087 1647 4663 e9b7 1cb1  .5.vj....GFc....
         0x0050:  5e0f 2fe2 7c84 2f4f                      ^./.|./O
 
+If you want to see what a multi-zone setup looks like, where
+different X.509 Certificate Authorities are setup, with
+overlapping, but not harmonious trust boundaries, try spinning
+`manifests/ipsec-demo-3-nodes.yml`, which takes three hosts and
+puts them into two zones; the first VM will be able to talk
+(encrypted) with the second and third VMs, but those two will only
+talk to each other in the clear.  The manifest is worth study,
+since it shows off multiple keypairs, as well as more than one
+encrypted peer host/net.
 
 # Contributing
 
