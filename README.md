@@ -73,6 +73,90 @@ to check out `manifests/ipsec-demo-aes256gcm16.yml`, to see how
 you can set the `ike` and `esp` options on a per-endpoint basis,
 and amp up that security!
 
+# Troubleshooting
+
+This release, especially when configured indiscriminantly as a
+BOSH add-on, has the potential to disrupt low-level network
+communications that are often thought of as "infallible".  Most of
+the time, this presents as packets simply not making it to some
+destination or other, pings timing out, etc.  In several cases,
+you may start to get the sneaking suspicion that someone has put
+in an iptables rule that is `-j DROP`-ing you.
+
+When you get to that point, you'll want to get on-box somehow
+(here's hoping `bosh ssh` still works for you!) and poke around.
+To help you out, this BOSH release comes with a small `envrc` that
+will put the strongSwan IPsec tools into your $PATH:
+
+    source /var/vcap/jobs/ipsec/envrc
+
+From there, you can take a look at the status of all known IPsec
+connections on the box:
+
+    bosh/vm $ ipsec statusall
+    Status of IKE charon daemon (strongSwan 5.8.4, Linux 4.15.0-99-generic, x86_64):
+      uptime: 47 seconds, since Jun 19 01:10:15 2020
+      malloc: sbrk 1351680, mmap 0, used 245488, free 1106192
+      worker threads: 11 of 16 idle, 5/0/0/0 working, job queue: 0/0/0/0, scheduled: 0
+      loaded plugins: charon aes sha1 sha2 random nonce x509 revocation constraints pubkey pkcs1 pkcs7 pkcs8 pkcs12 pem gmp xcbc cmac hmac attr kernel-netlink socket-default stroke
+    Listening IP addresses:
+      10.128.16.132
+    Connections:
+    encrypted-host-10.128.16.133:  %any...10.128.16.133/32  IKEv1/2, dpddelay=10s
+    encrypted-host-10.128.16.133:   local:  [CN=node1] uses public key authentication
+    encrypted-host-10.128.16.133:    cert:  "CN=node1"
+    encrypted-host-10.128.16.133:   remote: uses public key authentication
+    encrypted-host-10.128.16.133:   child:  10.128.16.132/32 === 10.128.16.133/32 TRANSPORT, dpdaction=restart
+    Routed Connections:
+    encrypted-host-10.128.16.133{1}:  ROUTED, TRANSPORT, reqid 1
+    encrypted-host-10.128.16.133{1}:   10.128.16.132/32 === 10.128.16.133/32
+    Security Associations (0 up, 0 connecting):
+      none
+
+The `Security Associations` section will show connected and half-connected
+peers.  When things break, you'll probably see lots of associations in the
+"connecting" state, either because of firewalling, or because of bad
+certificate / CA mismatch.
+
+It can often be helpful to figure out what certificates are being
+"seen" by the IPsec subsystem:
+
+    bosh/vm $ ipsec listcerts
+
+    List of X.509 End Entity Certificates
+
+      subject:  "CN=node1"
+      issuer:   "CN=IPSec Demo CA"
+      validity:  not before Jun 19 00:46:35 2020, ok
+                 not after  Jun 19 00:46:35 2021, ok (expires in 364 days)
+      serial:    69:78:b1:71:f2:80:ee:41:59:b8:3f:23:8e:f4:31:70:78:9f:67:44
+      altNames:  10.128.16.132
+      flags:
+      authkeyId: c0:ee:11:b9:8c:32:85:dc:80:1e:ef:20:ac:ac:99:f3:5f:92:c8:b0
+      subjkeyId: e3:ba:46:12:4e:8f:02:3c:20:84:4d:95:e8:e9:68:33:5d:20:36:31
+      pubkey:    RSA 2048 bits, has private key
+      keyid:     2e:3c:d7:3d:96:27:fd:de:95:b0:b8:e7:b2:72:41:40:5c:a1:81:ec
+      subjkey:   e3:ba:46:12:4e:8f:02:3c:20:84:4d:95:e8:e9:68:33:5d:20:36:31
+
+If you want to verify the presence and wellformedness of configure
+Certificate Authorities, you can run:
+
+    $ ipsec listcacerts
+
+    List of X.509 CA Certificates
+
+      subject:  "CN=IPSec Demo CA"
+      issuer:   "CN=IPSec Demo CA"
+      validity:  not before Jun 19 00:46:33 2020, ok
+                 not after  Jun 19 00:46:33 2021, ok (expires in 364 days)
+      serial:    30:cb:5b:f4:9e:3f:4e:9e:77:14:31:8a:1d:e6:37:b8:a9:7a:35:75
+      flags:     CA self-signed
+      authkeyId: c0:ee:11:b9:8c:32:85:dc:80:1e:ef:20:ac:ac:99:f3:5f:92:c8:b0
+      subjkeyId: c0:ee:11:b9:8c:32:85:dc:80:1e:ef:20:ac:ac:99:f3:5f:92:c8:b0
+      pubkey:    RSA 2048 bits
+      keyid:     68:2d:82:9a:96:fa:c1:02:d3:99:e0:4c:e5:29:49:41:fd:e3:49:f7
+      subjkey:   c0:ee:11:b9:8c:32:85:dc:80:1e:ef:20:ac:ac:99:f3:5f:92:c8:b0
+
 # Contributing
 
 This BOSH release was forked from the `strongswan-boshrelease`,
