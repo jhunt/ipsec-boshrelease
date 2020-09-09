@@ -2,11 +2,11 @@
 name: ipsec
 packages:
   - strongswan
-  - ttar
 
 templates:
   envrc:               envrc
   bin/pre-start:       bin/pre-start
+  bin/ttar:            bin/ttar
 
   etc/strongswan.conf: etc/strongswan.conf
   etc/ipsec.conf:      etc/ipsec.conf
