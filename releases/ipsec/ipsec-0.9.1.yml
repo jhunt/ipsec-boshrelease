@@ -1,0 +1,27 @@
+name: ipsec
+version: 0.9.1
+commit_hash: 049e30f
+uncommitted_changes: false
+jobs:
+- name: ipsec
+  version: f83657f1d4cd0a6709edd4e764cd9e58d3ed3f322a14dc816a3f915a93d79a64
+  fingerprint: f83657f1d4cd0a6709edd4e764cd9e58d3ed3f322a14dc816a3f915a93d79a64
+  sha1: sha256:13a98cdba3b9c455ce0c3fd1aff70b3a18759ddbfcde550fac858267146c5309
+  packages:
+  - strongswan
+packages:
+- name: gmp
+  version: 6f1e3d0857bdaffb3d91dbd5a57d821f7981f24f5845ae30938a62fd4b4db5fe
+  fingerprint: 6f1e3d0857bdaffb3d91dbd5a57d821f7981f24f5845ae30938a62fd4b4db5fe
+  sha1: sha256:45a5e1f294002f8af1edc6795715180b45b87ab47dbc56429c9e3d63cc8d2b49
+  dependencies: []
+- name: strongswan
+  version: a1d2140387c8e01cf34f1781ebc266097f4d95c6c300922ea6cf6b22efc48883
+  fingerprint: a1d2140387c8e01cf34f1781ebc266097f4d95c6c300922ea6cf6b22efc48883
+  sha1: sha256:350b3a8d208ad942228ea97f98097f9d775b9d66b41e207b37650d855928b57d
+  dependencies:
+  - gmp
+license:
+  version: c027ecdf0016e6f072c390230a50ce11be821c47c72536d9c66a1dd3b882640b
+  fingerprint: c027ecdf0016e6f072c390230a50ce11be821c47c72536d9c66a1dd3b882640b
+  sha1: sha256:dba37575e5322c6e23b626ca0473e3a0c53272b0b34e7b1e5a2d3a8b9e00b159
