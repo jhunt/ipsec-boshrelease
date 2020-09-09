@@ -85,6 +85,6 @@ stemcells:
 
 releases:
   - name:    ipsec
-    version: 0.9.0
-    url:     https://github.com/jhunt/ipsec-boshrelease/releases/download/v0.9.0/ipsec-0.9.0.tgz
-    sha1:    11e92be8f1c293f115484264747ae39d18b13daf
+    version: 0.9.1
+    url:     https://github.com/jhunt/ipsec-boshrelease/releases/download/v0.9.1/ipsec-0.9.1.tgz
+    sha1:    fd6378067b2b9f464a2a0b85eac38dae1b55b792
