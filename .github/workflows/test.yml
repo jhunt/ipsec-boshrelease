@@ -1,0 +1,21 @@
+---
+name: tests
+on: [ push ]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v2
+        with:
+          ref: master
+
+
+      - name: bosh create-release
+        id:   bosh
+        uses: jhunt/bosh-create-release@v1
+        with:
+          name: ipsec
